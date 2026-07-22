@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pranjal Yadav — Video Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital@1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --black: #0a0a0a;
+    --dark: #111111;
+    --card: #161616;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-dim: #8a6e2f;
+    --white: #f5f0e8;
+    --gray: #888880;
+    --border: rgba(201,168,76,0.18);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.2rem 4rem;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    color: var(--gray);
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 70% 50%, rgba(201,168,76,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 20% 80%, rgba(201,168,76,0.04) 0%, transparent 60%);
+  }
+  /* film grain */
+  .hero-bg::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 800px; }
+  .hero-eyebrow {
+    font-size: 0.72rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .hero-eyebrow::before {
+    content: ''; display: block; width: 40px; height: 1px; background: var(--gold);
+  }
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4.5rem, 12vw, 9rem);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    color: var(--white);
+  }
+  h1 span { color: var(--gold); }
+  .hero-tagline {
+    margin-top: 1.8rem;
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--gray);
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+    max-width: 480px;
+    line-height: 1.6;
+  }
+  .hero-cta {
+    margin-top: 2.5rem;
+    display: flex; gap: 1rem; flex-wrap: wrap;
+  }
+  .btn-primary {
+    padding: 0.8rem 2rem;
+    background: var(--gold);
+    color: var(--black);
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+  }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .btn-outline {
+    padding: 0.8rem 2rem;
+    background: transparent;
+    color: var(--gold);
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    text-decoration: none; border: 1px solid var(--gold); cursor: pointer;
+    transition: background 0.3s, color 0.3s, transform 0.2s;
+  }
+  .btn-outline:hover { background: rgba(201,168,76,0.1); transform: translateY(-2px); }
+  .hero-scroll {
+    position: absolute; bottom: 2.5rem; left: 4rem; z-index: 1;
+    display: flex; align-items: center; gap: 0.8rem;
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dim);
+  }
+  .scroll-line {
+    width: 50px; height: 1px; background: var(--gold-dim);
+    animation: scrollPulse 2s infinite;
+  }
+  @keyframes scrollPulse {
+    0%, 100% { transform: scaleX(1); opacity: 1; }
+    50% { transform: scaleX(0.5); opacity: 0.4; }
+  }
+
+  /* ── SECTIONS ── */
+  section { padding: 6rem 4rem; }
+  .section-label {
+    font-size: 0.7rem; letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.8rem;
+  }
+  .section-label::after {
+    content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--gold-dim);
+  }
+  h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    letter-spacing: 0.05em;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  /* ── ABOUT ── */
+  #about { background: var(--dark); }
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; margin-top: 3.5rem;
+    align-items: start;
+  }
+  .about-text p {
+    color: var(--gray); line-height: 1.9; font-size: 0.95rem; margin-bottom: 1.2rem;
+  }
+  .about-text p strong { color: var(--white); font-weight: 500; }
+  .stats-row {
+    display: flex; gap: 2.5rem; margin-top: 2rem; flex-wrap: wrap;
+  }
+  .stat-item {}
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem; color: var(--gold); line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray); margin-top: 0.2rem;
+  }
+  .tools-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+  }
+  .tool-chip {
+    padding: 0.9rem 1.2rem;
+    border: 1px solid var(--border);
+    background: var(--card);
+    display: flex; align-items: center; gap: 0.8rem;
+    font-size: 0.82rem; color: var(--white);
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .tool-chip:hover { border-color: var(--gold); background: rgba(201,168,76,0.05); }
+  .tool-icon { font-size: 1.2rem; }
+
+  /* ── WORK ── */
+  #work { background: var(--black); }
+  .filter-bar {
+    display: flex; gap: 0.6rem; margin: 2rem 0 3rem; flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 0.45rem 1.2rem;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--gray); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--gold); border-color: var(--gold); color: var(--black); font-weight: 600;
+  }
+  .work-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+  }
+  .work-card {
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden; cursor: pointer;
+    background: var(--card);
+    border: 1px solid var(--border);
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .work-card:hover { border-color: var(--gold); transform: translateY(-4px); }
+  .work-thumb {
+    width: 100%; height: 180px;
+    background: var(--dark);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden; flex-shrink: 0;
+  }
+  .thumb-gradient {
+    position: absolute; inset: 0;
+    transition: opacity 0.4s;
+  }
+  .work-card:hover .thumb-gradient { opacity: 0.6; }
+  .play-btn {
+    width: 52px; height: 52px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 1;
+    transition: background 0.3s, transform 0.3s;
+  }
+  .work-card:hover .play-btn { background: var(--gold); transform: scale(1.1); }
+  .play-btn svg { width: 18px; height: 18px; fill: var(--gold); margin-left: 3px; }
+  .work-card:hover .play-btn svg { fill: var(--black); }
+  .work-info { padding: 1.2rem; }
+  .work-tag {
+    font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 0.4rem;
+  }
+  .work-title {
+    font-size: 0.95rem; font-weight: 500; color: var(--white); margin-bottom: 0.3rem;
+  }
+  .work-meta { font-size: 0.75rem; color: var(--gray); }
+
+  /* ── SERVICES ── */
+  #services { background: var(--dark); }
+  .services-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 3rem;
+  }
+  .service-card {
+    padding: 2rem;
+    border: 1px solid var(--border);
+    background: var(--card);
+    position: relative; overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--gold);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s;
+  }
+  .service-card:hover { border-color: var(--gold-dim); }
+  .service-card:hover::before { transform: scaleX(1); }
+  .service-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem; color: rgba(201,168,76,0.12); line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .service-title {
+    font-size: 1rem; font-weight: 600; color: var(--white); margin-bottom: 0.8rem;
+  }
+  .service-desc { font-size: 0.83rem; color: var(--gray); line-height: 1.7; }
+
+  /* ── CONTACT ── */
+  #contact { background: var(--black); }
+  .contact-inner {
+    max-width: 600px; margin: 3rem auto 0; text-align: center;
+  }
+  .contact-inner p {
+    color: var(--gray); font-size: 0.95rem; line-height: 1.8; margin-bottom: 2.5rem;
+  }
+  .contact-links {
+    display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 2rem;
+  }
+  .contact-link {
+    padding: 0.7rem 1.6rem;
+    border: 1px solid var(--border);
+    color: var(--gray); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+    text-decoration: none;
+    display: flex; align-items: center; gap: 0.5rem;
+    transition: all 0.3s;
+  }
+  .contact-link:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 2rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.72rem; color: var(--gray); letter-spacing: 0.05em;
+  }
+  footer span { color: var(--gold-dim); }
+
+  /* ── ANIMATIONS ── */
+  .fade-up {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { gap: 1.5rem; }
+    #hero, section { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .hero-scroll { left: 1.5rem; }
+    .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    .work-grid { grid-template-columns: repeat(2, 1fr); }
+    .services-grid { grid-template-columns: 1fr 1fr; }
+    footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.5rem; }
+  }
+  @media (max-width: 560px) {
+    .nav-links { display: none; }
+    .work-grid { grid-template-columns: 1fr; }
+    .services-grid { grid-template-columns: 1fr; }
+    .tools-grid { grid-template-columns: 1fr 1fr; }
+    .stats-row { gap: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#hero">PY</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Reel Editor &amp; Velocity Editor</div>
+    <h1>PRANJAL<br><span>YADAV</span></h1>
+    <p class="hero-tagline">Reels that feel cinematic. Velocity edits that hit like music. Built for creators, not brands.</p>
+    <div class="hero-cta">
+      <a class="btn-primary" href="#work">View My Work</a>
+      <a class="btn-outline" href="#contact">Let's Collaborate</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-label">About Me</div>
+  <h2>THE EDITOR<br>BEHIND THE FRAME</h2>
+  <div class="about-grid fade-up">
+    <div class="about-text">
+      <p>I'm <strong>Pranjal Yadav</strong>, a video editor with <strong>3 years of experience</strong> specializing in <strong>speed ramps, velocity edits and can also edit reels</strong>. I live inside After Effects and know exactly how to make a cut feel alive.</p>
+      <p>I don't edit for brands. My work is purely for <strong>creators</strong> — fitness athletes, vloggers, and podcasters who want their content to hit different. Every frame has a purpose, every transition has a reason.</p>
+      <p>If you're a creator who wants edits that feel cinematic, energetic, and personal — not corporate — let's talk.</p>
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-num">3+</div>
+          <div class="stat-label">Years Editing</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Creator-Focused</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label" style="margin-bottom:1.2rem;">My Tool</div>
+      <div class="tools-grid" style="grid-template-columns: 1fr;">
+        <div class="tool-chip" style="padding: 1.4rem 1.5rem;">
+          <span class="tool-icon">✨</span>
+          <div>
+            <div style="font-weight:600; font-size:0.9rem;">Adobe After Effects</div>
+            <div style="font-size:0.75rem; color:var(--gray); margin-top:0.2rem;">Speed ramps · Velocity edits · Reels edits</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORK -->
+<section id="work">
+  <div class="section-label">Portfolio</div>
+  <h2>SELECTED<br>WORK</h2>
+  <div class="filter-bar">
+    <button class="filter-btn active">All</button>
+    <button class="filter-btn">Fitness</button>
+    <button class="filter-btn">Podcast</button>
+    <button class="filter-btn">Mini Vlogs</button>
+  </div>
+  <div class="work-grid fade-up">
+
+
+
+    <div class="work-card">
+      <div class="work-thumb" style="padding:0; overflow:hidden; position:relative;">
+        <iframe width="100%" height="100%" style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"
+        src="https://www.youtube.com/embed/3f6Cdy5DgAc"
+        allowfullscreen></iframe>
+      </div>
+      <div class="work-info">
+        <div class="work-tag">Podcast</div>
+        <div class="work-title">Podcast Clips — Talking Head</div>
+        <div class="work-meta">YouTube + Instagram</div>
+      </div>
+    </div>
+
+
+
+    <div class="work-card">
+      <div class="work-thumb" style="padding:0; overflow:hidden; position:relative;">
+        <iframe width="100%" height="100%" style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"
+        src="https://www.youtube.com/embed/tt79lb0Iv3M"
+        allowfullscreen></iframe>
+      </div>
+      <div class="work-info">
+        <div class="work-tag">Advance</div>
+        <div class="work-title">Marvel Movie — Velocity Edit</div>
+        <div class="work-meta">After Effects · Beat Sync</div>
+      </div>
+    </div>
+
+
+
+    <div class="work-card">
+      <div class="work-thumb" style="padding:0; overflow:hidden; position:relative;">
+        <iframe width="100%" height="100%" style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"
+        src="https://www.youtube.com/embed/qR5uGqt-KiQ"
+        allowfullscreen></iframe>
+      </div>
+      <div class="work-info">
+        <div class="work-tag">Reel</div>
+        <div class="work-title">Reels Editing — Monograph</div>
+        <div class="work-meta">Monograph · Typography</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-label">What I Offer</div>
+  <h2>SERVICES</h2>
+  <div class="services-grid fade-up">
+    <div class="service-card">
+      <div class="service-num">01</div>
+      <div class="service-title">Speed Ramp & Velocity Editing</div>
+      <div class="service-desc">Smooth, satisfying speed ramps and velocity edits built entirely in After Effects. Every cut timed to the beat, every ramp crafted to feel cinematic.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">02</div>
+      <div class="service-title">Color Grading</div>
+      <div class="service-desc">A consistent, moody look that makes your content stand out. From warm cinematic tones to high-contrast dark grades — your signature style.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">03</div>
+      <div class="service-title">Fitness Creator Edits</div>
+      <div class="service-desc">High-energy gym and training videos with punchy transitions, beat-synced cuts, and the kind of energy that motivates people to move.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">04</div>
+      <div class="service-title">Monograph & Typography Editing</div>
+      <div class="service-desc">Clean, text-driven edits where typography does the talking. Monograph-style videos with precise font animations, kinetic text, and minimal motion design — perfect for creators who want their content to feel artistic and intentional.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">05</div>
+      <div class="service-title">Mini Vlog Editing</div>
+      <div class="service-desc">Day-in-the-life and travel vlogs edited with smooth flow, cinematic color, and transitions that feel natural — not overdone.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">06</div>
+      <div class="service-title">Per Video Editing</div>
+      <div class="service-desc">No monthly commitments, no packages. You send a video, an advance payment, I edit it, you pay full amount after that one edited video. Simple, flexible, and on your terms — whenever you need it.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label">Get In Touch</div>
+  <h2 style="text-align:center;">LET'S CREATE<br>SOMETHING GREAT</h2>
+  <div class="contact-inner fade-up">
+    <p>I work exclusively with <strong style="color:var(--white)">creators</strong> — fitness athletes, vloggers, and podcasters. No brands. If you're a creator who wants edits that actually feel like yours, let's connect.</p>
+    <a class="btn-primary" href="https://mail.google.com/mail/?view=cm&to=pranjalworks85@gmail.com" style="display:inline-block;">✉ Send Me a Message</a>
+    <div class="contact-links">
+      <a class="contact-link" href="https://www.instagram.com/kpral_for_you.123/#">📸 Instagram</a>
+      <a class="contact-link" href="https://www.youtube.com/@KPRAL_EDITS">▶ YouTube</a>
+      <a class="contact-link" href="#">💬 WhatsApp</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>© 2026 <span>Pranjal Yadav</span>. All rights reserved.</div>
+  <div>Speed Ramp &amp; Velocity Editor · Creator-Only · India</div>
+</footer>
+
+<script>
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Scroll fade-up
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
